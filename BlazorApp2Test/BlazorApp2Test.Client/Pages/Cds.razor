@@ -1,0 +1,68 @@
+﻿@page "/cds"
+@inject HttpClient Http
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender:false))
+@inject NavigationManager NavigationManager
+
+
+<PageTitle>Cds</PageTitle>
+
+<h1>Cds</h1>
+
+<span class="btn btn-dark" @onclick=@(()=> AddGame())>Add a new cd</span>
+
+@if (cds.Count == 0)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Artist</th>
+                <th>Genre</th>
+                <th>Price</th>
+                <th>Date Released:</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var cd in cds)
+            {
+                <tr>
+                    <td>@cd.NameCd</td>
+                    <td>@cd.Artist</td>
+                    <td>@cd.Genre</td>
+                    <td>@cd.Price</td>
+                    <td>@cd.DateReleased</td>
+                    <td> <span @onclick=@(() => EditGame(@cd.IdCd)) >Edit</span> </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+   
+}
+
+@code {
+   List<Cd> cds = new List<Cd>();
+    protected override async Task OnInitializedAsync()
+    {
+       var result = await Http.GetFromJsonAsync<List<Cd>>("api/cd");
+       if(result != null)
+        {
+            cds = result;
+        }
+    }
+
+    void EditGame(int id)
+    {
+        NavigationManager.NavigateTo($"/edit-cd/{id}");
+    }
+
+    void AddGame()
+    {
+        NavigationManager.NavigateTo($"/edit-cd");
+    }
+}
+

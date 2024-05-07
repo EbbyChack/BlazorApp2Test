@@ -1,0 +1,91 @@
+﻿@page "/edit-cd"
+@page "/edit-cd/{id}"
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender:false))
+
+
+
+@if (Id == null)
+{
+    <h3>Add a new Cd</h3>
+
+}
+else
+{
+    <h3>Edit Cd @cd.NameCd</h3>
+}
+
+<EditForm Model="cd" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="NameCd">Name</label>
+        <InputText id="NameCd" class="form-control" @bind-Value="@cd.NameCd" />
+    </div>
+
+    <div class="form-group">
+        <label for="Artist">Artist</label>
+        <InputText id="Artist" class="form-control" @bind-Value="@cd.Artist" />
+    </div>
+
+    <div class="form-group">
+        <label for="Genre">Genre</label>
+        <InputText id="Genre" class="form-control" @bind-Value="@cd.Genre" />
+    </div>
+
+    <div class="form-group">
+        <label for="Price">Price</label>
+        <InputNumber id="Price" class="form-control" @bind-Value="@cd.Price" />
+    </div>
+
+    <div class="form-group">
+        <label for="DateReleased">Date Released</label>
+        <InputDate id="DateReleased" class="form-control" @bind-Value="@cd.DateReleased" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+
+</EditForm>
+
+
+
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+    public Cd cd = new Cd();
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        if (!string.IsNullOrEmpty(Id))
+        {
+            int id;
+            if (Int32.TryParse(Id, out id))
+            {
+                var result = await Http.GetFromJsonAsync<Cd>($"api/cd/{id}");
+                if (result != null)
+                {
+                    cd = result;
+                }
+            }
+        }
+    }
+
+    async Task HandleValidSubmit()
+    {
+        if (string.IsNullOrEmpty(Id))
+        {
+            await Http.PostAsJsonAsync("api/cd", cd);
+            NavigationManager.NavigateTo("/cds");
+        }
+        else
+        {
+            await Http.PutAsJsonAsync($"api/cd/{cd.IdCd}", cd);
+            NavigationManager.NavigateTo("/cds");
+        } 
+    }
+}
+
